@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -306,7 +305,7 @@ const RequestHelpForm: React.FC<RequestHelpFormProps> = ({ onSubmit, onClose }) 
           />
         </div>
 
-        <div className="flex justify-end gap-2 pt-4">
+        <div className="flex justify-end gap-2 pt-4 sticky bottom-0">
           <Button
             type="button"
             variant="outline"
