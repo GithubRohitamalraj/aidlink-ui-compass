@@ -305,7 +305,7 @@ const RequestHelpForm: React.FC<RequestHelpFormProps> = ({ onSubmit, onClose }) 
           />
         </div>
 
-        <div className="flex justify-end gap-2 pt-4 sticky bottom-0">
+        <div className="flex justify-end gap-2 pt-6 sticky bottom-0 bg-background pb-4 border-t mt-6">
           <Button
             type="button"
             variant="outline"

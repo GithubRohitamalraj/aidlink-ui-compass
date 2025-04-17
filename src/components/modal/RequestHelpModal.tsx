@@ -31,7 +31,7 @@ const RequestHelpModal: React.FC<RequestHelpModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh] p-0">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-hidden p-0">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle className="text-xl text-aidlink-dark">Request Emergency Help</DialogTitle>
           <DialogDescription>
@@ -39,8 +39,8 @@ const RequestHelpModal: React.FC<RequestHelpModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-100px)] px-6">
-          <div className="pr-4 pb-6">
+        <ScrollArea className="max-h-[calc(90vh-120px)] px-6">
+          <div className="pr-4 pb-16">
             <RequestHelpForm onSubmit={handleSubmit} onClose={onClose} />
           </div>
         </ScrollArea>
