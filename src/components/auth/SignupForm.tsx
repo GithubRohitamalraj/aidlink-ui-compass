@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
 
 type Role = 'survivor' | 'volunteer' | 'admin';
 
@@ -23,11 +23,11 @@ const SignupForm: React.FC = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    phoneNumber: '',
     email: '',
     location: '',
     skills: '',
     password: '',
+    confirmPassword: ''
   });
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +46,14 @@ const SignupForm: React.FC = () => {
   };
 
   const handleNextStep = () => {
+    if (step === 1 && formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
     setStep(step + 1);
   };
 
@@ -53,22 +61,50 @@ const SignupForm: React.FC = () => {
     setStep(step - 1);
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+            role: selectedRole,
+            location: formData.location,
+            skills: formData.skills
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Signup Error",
+          description: error.message,
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
       toast({
         title: "Account created successfully",
-        description: "Welcome to AidLink! You can now log in.",
+        description: "Welcome to AidLink! Please check your email to verify your account.",
       });
       navigate('/login');
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "Unexpected Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Form fields based on role
   const renderFormFields = () => {
     if (step === 1) {
       return (
@@ -85,12 +121,12 @@ const SignupForm: React.FC = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Label htmlFor="email">Email Address</Label>
             <Input 
-              id="phoneNumber" 
-              type="tel" 
-              placeholder="Enter your phone number" 
-              value={formData.phoneNumber}
+              id="email" 
+              type="email" 
+              placeholder="Enter your email" 
+              value={formData.email}
               onChange={handleChange}
               required
             />
@@ -103,6 +139,18 @@ const SignupForm: React.FC = () => {
               type="password" 
               placeholder="Create a password" 
               value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input 
+              id="confirmPassword" 
+              type="password" 
+              placeholder="Confirm your password" 
+              value={formData.confirmPassword}
               onChange={handleChange}
               required
             />
@@ -164,30 +212,16 @@ const SignupForm: React.FC = () => {
       
       if (selectedRole === 'admin') {
         return (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="Enter your email" 
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="location">Organization</Label>
-              <Input 
-                id="location" 
-                placeholder="Enter your organization name" 
-                value={formData.location}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </>
+          <div className="space-y-2">
+            <Label htmlFor="location">Organization</Label>
+            <Input 
+              id="location" 
+              placeholder="Enter your organization name" 
+              value={formData.location}
+              onChange={handleChange}
+              required
+            />
+          </div>
         );
       }
     }
@@ -231,7 +265,6 @@ const SignupForm: React.FC = () => {
           </TabsList>
         </Tabs>
 
-        {/* Progress Indicator */}
         <div className="flex items-center justify-center mb-6">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-aidlink-primary text-white' : 'bg-gray-200'}`}>
             {step > 1 ? <Check size={16} /> : 1}

@@ -8,11 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 type Role = 'survivor' | 'volunteer' | 'admin';
 
 const LoginForm: React.FC = () => {
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role>('survivor');
@@ -20,19 +21,40 @@ const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast({
+          title: "Login Error",
+          description: error.message,
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
       toast({
         title: "Logged in successfully",
         description: `Welcome back, ${selectedRole}!`,
       });
       navigate('/dashboard');
-    }, 1000);
+    } catch (error) {
+      toast({
+        title: "Unexpected Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -72,13 +94,13 @@ const LoginForm: React.FC = () => {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Label htmlFor="email">Email Address</Label>
             <Input 
-              id="phoneNumber" 
-              type="tel" 
-              placeholder="Enter your phone number" 
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              id="email" 
+              type="email" 
+              placeholder="Enter your email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
