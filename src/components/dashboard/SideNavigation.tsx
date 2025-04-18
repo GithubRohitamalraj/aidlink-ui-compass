@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Send, History, LogOut, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -47,24 +47,6 @@ const SideNavigation: React.FC = () => {
           active={location.pathname === '/dashboard'}
         />
         <NavigationItem
-          href="#request-help"
-          icon={<Send size={20} />}
-          label="Request Help"
-          active={false}
-        />
-        <NavigationItem
-          href="#history"
-          icon={<History size={20} />}
-          label="History"
-          active={false}
-        />
-        <NavigationItem
-          href="#alerts"
-          icon={<AlertCircle size={20} />}
-          label="Alerts"
-          active={false}
-        />
-        <NavigationItem
           href="#"
           icon={<LogOut size={20} />}
           label="Logout"
@@ -76,3 +58,4 @@ const SideNavigation: React.FC = () => {
 };
 
 export default SideNavigation;
+
