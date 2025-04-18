@@ -77,25 +77,19 @@ const Dashboard: React.FC = () => {
 
     switch (profile.role) {
       case 'survivor':
-        return <SurvivorDashboard />;
+        return <SurvivorDashboard profile={profile} />;
       case 'volunteer':
         return <VolunteerDashboard />;
       case 'admin':
         return <AdminDashboard />;
       default:
-        return <SurvivorDashboard />;
+        return <SurvivorDashboard profile={profile} />;
     }
   };
   
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar isLoggedIn={true} userName={profile?.full_name || 'User'} />
-      
-      <div className="bg-white py-4 px-4 border-b">
-        <div className="container mx-auto">
-          <h1 className="text-2xl font-bold text-aidlink-dark">AidLink</h1>
-        </div>
-      </div>
       
       <main className="flex-1 container mx-auto py-6 px-4">
         {renderDashboard()}
