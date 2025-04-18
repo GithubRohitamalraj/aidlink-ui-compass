@@ -9,6 +9,8 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import 'leaflet/dist/leaflet.css';
+
 
 const queryClient = new QueryClient();
 

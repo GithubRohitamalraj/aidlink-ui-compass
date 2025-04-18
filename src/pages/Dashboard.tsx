@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navigation/Navbar';
@@ -41,7 +40,17 @@ const Dashboard: React.FC = () => {
 
         if (error) throw error;
         
-        setProfile(profile);
+        // Make sure role is a valid value
+        if (profile && (profile.role === 'survivor' || profile.role === 'volunteer' || profile.role === 'admin')) {
+          setProfile(profile);
+        } else {
+          // If role is invalid, show error
+          toast({
+            title: "Invalid user role",
+            description: "Your account has an invalid role. Please contact support.",
+            variant: "destructive"
+          });
+        }
       } catch (error) {
         toast({
           title: "Error loading profile",
@@ -75,6 +84,7 @@ const Dashboard: React.FC = () => {
   const renderDashboard = () => {
     if (!profile) return null;
 
+    // Ensure we strictly check the role and render the appropriate dashboard
     switch (profile.role) {
       case 'survivor':
         return <SurvivorDashboard profile={profile} />;
@@ -83,7 +93,19 @@ const Dashboard: React.FC = () => {
       case 'admin':
         return <AdminDashboard />;
       default:
-        return <SurvivorDashboard profile={profile} />;
+        // If we somehow get here with an invalid role, show an error message
+        return (
+          <div className="flex flex-col items-center justify-center min-h-[50vh] bg-white p-8 rounded-lg shadow">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Dashboard Error</h2>
+            <p className="text-gray-700 mb-6">Invalid user role detected: {profile.role}</p>
+            <button 
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+              onClick={() => navigate('/login')}
+            >
+              Return to Login
+            </button>
+          </div>
+        );
     }
   };
   

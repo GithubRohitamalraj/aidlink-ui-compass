@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,6 @@ import SurvivorWelcome from './SurvivorWelcome';
 import ActiveRequestCard from './ActiveRequestCard';
 import RequestHistory from './RequestHistory';
 import EmergencyAnnouncements from './EmergencyAnnouncements';
-import SideNavigation from './SideNavigation';
 import { RequestStatus } from './HelpRequestCard';
 
 interface HelpRequest {
@@ -130,14 +128,9 @@ const SurvivorDashboard: React.FC<SurvivorDashboardProps> = ({ profile }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-      {/* Left sidebar - only visible on medium screens and up */}
-      <div className="hidden md:block md:col-span-3">
-        <SideNavigation />
-      </div>
-      
+    <div className="grid grid-cols-1 gap-6">
       {/* Main content */}
-      <div className="col-span-1 md:col-span-9 space-y-6">
+      <div className="space-y-6">
         {/* Welcome section */}
         <SurvivorWelcome name={profile?.full_name} />
         
