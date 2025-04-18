@@ -1,23 +1,81 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navigation/Navbar';
 import SurvivorDashboard from '../components/dashboard/SurvivorDashboard';
 import VolunteerDashboard from '../components/dashboard/VolunteerDashboard';
 import AdminDashboard from '../components/dashboard/AdminDashboard';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
-// In a real app, this would come from authentication
 type UserRole = 'survivor' | 'volunteer' | 'admin';
 
+interface UserProfile {
+  id: string;
+  role: UserRole;
+  full_name: string | null;
+}
+
 const Dashboard: React.FC = () => {
-  // For demo purposes, we're allowing role switching
-  const [userRole, setUserRole] = useState<UserRole>('survivor');
-  
-  // In a real app, this would be the actual user's name
-  const userName = "Jane Doe";
-  
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (error) throw error;
+        
+        setProfile(profile);
+      } catch (error) {
+        toast({
+          title: "Error loading profile",
+          description: "Please try logging in again",
+          variant: "destructive"
+        });
+        navigate('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!session) {
+        navigate('/login');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, toast]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
   const renderDashboard = () => {
-    switch (userRole) {
+    if (!profile) return null;
+
+    switch (profile.role) {
       case 'survivor':
         return <SurvivorDashboard />;
       case 'volunteer':
@@ -31,25 +89,11 @@ const Dashboard: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar isLoggedIn={true} userName={userName} />
+      <Navbar isLoggedIn={true} userName={profile?.full_name || 'User'} />
       
       <div className="bg-white py-4 px-4 border-b">
         <div className="container mx-auto">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-aidlink-dark">AidLink</h1>
-            
-            {/* Demo role switcher - In a real app, this would not be here */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">Demo:</span>
-              <Tabs defaultValue={userRole} onValueChange={(val) => setUserRole(val as UserRole)}>
-                <TabsList>
-                  <TabsTrigger value="survivor">Survivor</TabsTrigger>
-                  <TabsTrigger value="volunteer">Volunteer</TabsTrigger>
-                  <TabsTrigger value="admin">Admin</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold text-aidlink-dark">AidLink</h1>
         </div>
       </div>
       
